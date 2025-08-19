@@ -82,7 +82,7 @@ function Projects() {
       title: "Love at First Fight Game",
       desc: "Bullet-hell where the player writes a love poem to defeat the dragon, made using C# and Unity.",
       icon: <Gamepad className="w-6 h-6" />,
-      link: "https://hilbertshotel.itch.io/love-at-first-fight",
+      demo: "https://hilbertshotel.itch.io/love-at-first-fight",
       img: import.meta.env.BASE_URL + "/assets/loveatfirstfight.png",
       palette: "from-fuchsia-500 to-rose-500",
     },
