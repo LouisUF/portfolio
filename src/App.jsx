@@ -1,7 +1,10 @@
 import React from "react";
 import { Code2, Server, Gamepad, LayoutGrid, Link2 } from "lucide-react";
 import { motion } from "framer-motion";
-
+import turtlePic from './assets/turtlepic.png'
+import gatorPic from './assets/GatorGuide.png'
+import caudalPic from './assets/caudalblock.png'
+import lovePic from './assets/loveatfirstfight.png'
 /*
   ----------------------------------------------------------------------------
   Louis Li – Portfolio Website (React + TailwindCSS + Framer-Motion)
@@ -83,7 +86,7 @@ function Projects() {
       desc: "Bullet-hell where the player writes a love poem to defeat the dragon, made using C# and Unity.",
       icon: <Gamepad className="w-6 h-6" />,
       link: "https://hilbertshotel.itch.io/love-at-first-fight",
-      img: "/assets/loveatfirstfight.png",
+      img: lovePic,
       palette: "from-fuchsia-500 to-rose-500",
     },
     {
@@ -91,7 +94,7 @@ function Projects() {
       desc: "High-fidelity Unity & C# simulator for venipuncture training with real-time scoring and analytics dashboard.",
       icon: <LayoutGrid className="w-6 h-6" />,
       link: "https://github.com/shreya-shenoy/CaudalBlock",
-      img: "/assets/caudalblock.png",
+      img: caudalPic,
       palette: "from-sky-500 to-teal-500",
     },
     {
@@ -100,7 +103,7 @@ function Projects() {
       icon: <Server className="w-6 h-6" />,
       link: "https://github.com/CaseZumbrum/GatorGuide",
       demo: "https://gator-guide.com/#/",
-      img: "/assets/GatorGuide.png",
+      img: gatorPic,
       palette: "from-lime-500 to-emerald-500",
     },
     {
@@ -109,7 +112,7 @@ function Projects() {
         "A vertical platformer where your deaths spawn platforms for your future turtles to use on their way up!",
       icon: <Gamepad className="w-6 h-6" />,
       demo: "https://septicaled.itch.io/turtle-all-the-way-up",
-      img: "/assets/turtlepic.png",
+      img: turtlePic,
       palette: "from-amber-400 to-emerald-500",
     },
   ];
