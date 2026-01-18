@@ -1,14 +1,1177 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/portfolio/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Louis Li Portfolio</title>
-    <script type="module" crossorigin src="/portfolio/assets/index-BNCA2Kp-.js"></script>
-    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-CXSO7tuG.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Louis Li's Portfolio and Works</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .book-container {
+            position: relative;
+            width: 95vw;
+            max-width: 1400px;
+            height: 85vh;
+            max-height: 900px;
+            perspective: 2000px;
+        }
+
+        .book-container.closed {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* NEW: allow full viewport height so the cover never gets clipped */
+            height: 100vh;
+            max-height: none;
+
+            /* Optional: reserve a bit of space so it still feels centered if nav appears later */
+            padding-bottom: 90px;
+        }
+
+        /* NEW: responsive cover sizing (no hardcoded 600x800) */
+        .book-container.closed .book {
+            aspect-ratio: 3 / 4;
+
+            height: min(90vh, 860px);
+            width: auto;
+
+            max-width: 92vw;
+
+            margin: auto;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* FIX: when closed, only show the cover (not the two halves) */
+        .book-container.closed .book-half {
+            display: none;
+        }
+
+
+        .book-container.closed .book-cover {
+            display: flex;
+        }
+
+        .book-container.closed .page {
+            display: none;
+        }
+
+        .book-cover {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #654321 0%, #8b4513 50%, #654321 100%);
+            border: 5px solid #d4a574;
+            box-shadow:
+                inset 0 0 50px rgba(0, 0, 0, 0.3),
+                0 20px 60px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(0, 0, 0, 0.1) 3px,
+                    rgba(0, 0, 0, 0.1) 6px
+                );
+            pointer-events: none;
+        }
+
+        .book-cover-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .book-cover h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5em;
+            color: #f4e8d0;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            border: none;
+            line-height: 1.3;
+        }
+
+        .book-cover p {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5em;
+            color: #d4a574;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-style: italic;
+            margin-bottom: 40px;
+            text-align: center;     /* override justify */
+            text-justify: auto;     /* optional: ensures no weird justification behavior */
+            letter-spacing: 0.02em; /* optional: small, tasteful */
+            word-spacing: normal;   /* important: prevents extra spacing */
+        }
+
+        .open-book-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background: linear-gradient(145deg, #d4a574, #c4956a);
+            border: 3px solid #f4e8d0;
+            border-radius: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2em;
+            color: #2c1810;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .open-book-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .open-book-btn:active {
+            transform: scale(0.98);
+        }
+
+        .cover-ornament {
+            position: absolute;
+            border: 3px solid #d4a574;
+        }
+
+        .cover-ornament.top-left {
+            top: 30px;
+            left: 30px;
+            width: 80px;
+            height: 80px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .cover-ornament.top-right {
+            top: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .cover-ornament.bottom-left {
+            bottom: 30px;
+            left: 30px;
+            width: 80px;
+            height: 80px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .cover-ornament.bottom-right {
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .book-container.closed .book-spine {
+            display: none;
+        }
+
+        .book-container.closed .navigation {
+            display: none;
+        }
+
+        .navigation.disabled {
+            pointer-events: none;
+        }
+
+        .navigation.disabled .nav-button {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .book {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .book-half {
+            width: 50%;
+            height: 100%;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #f4e8d0 0%, #f9f3e6 50%, #f4e8d0 100%);
+            border: 3px solid #8b4513;
+            box-shadow:
+                inset 0 0 30px rgba(139, 69, 19, 0.1),
+                0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 69, 19, 0.03) 2px,
+                    rgba(139, 69, 19, 0.03) 3px
+                );
+            pointer-events: none;
+        }
+
+        .page-content {
+            padding: 50px 40px;
+            height: 100%;
+            overflow-y: auto;
+            color: #2c1810;
+        }
+
+        .page-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .page-content::-webkit-scrollbar-track {
+            background: rgba(139, 69, 19, 0.1);
+        }
+
+        .page-content::-webkit-scrollbar-thumb {
+            background: #8b4513;
+            border-radius: 4px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5em;
+            color: #8b4513;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid #8b4513;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8em;
+            color: #654321;
+            margin: 25px 0 15px 0;
+            border-left: 4px solid #8b4513;
+            padding-left: 15px;
+        }
+
+        h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3em;
+            color: #654321;
+            margin: 20px 0 10px 0;
+        }
+
+        p, li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc-item {
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(139, 69, 19, 0.05);
+            border-left: 4px solid #8b4513;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toc-item:hover {
+            background: rgba(139, 69, 19, 0.1);
+            transform: translateX(5px);
+        }
+
+        .toc-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2em;
+            color: #654321;
+            margin-bottom: 5px;
+        }
+
+        .toc-page {
+            font-style: italic;
+            color: #8b4513;
+            font-size: 0.9em;
+        }
+
+        .project-card {
+            background: rgba(139, 69, 19, 0.05);
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #d4a574;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px solid #8b4513;
+        }
+
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .skill-item {
+            background: rgba(139, 69, 19, 0.05);
+            padding: 15px;
+            border: 1px solid #d4a574;
+            border-radius: 5px;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            color: #654321;
+        }
+
+        .contact-info {
+            background: rgba(139, 69, 19, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .contact-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #8b4513, #654321);
+            border: 3px solid #d4a574;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #f4e8d0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button.skip-button {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .nav-button:hover:not(.disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-button:active:not(.disabled) {
+            transform: scale(0.95);
+        }
+
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2em;
+            color: #8b4513;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .book-spine {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(to right, #654321, #8b4513, #654321);
+            transform: translateX(-50%);
+            box-shadow:
+                inset 0 0 10px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 50;
+        }
+
+        .decorative-corner {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border: 2px solid #8b4513;
+        }
+
+        .decorative-corner.top-left {
+            top: 15px;
+            left: 15px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .decorative-corner.top-right {
+            top: 15px;
+            right: 15px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .decorative-corner.bottom-left {
+            bottom: 45px;
+            left: 15px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .decorative-corner.bottom-right {
+            bottom: 45px;
+            right: 15px;
+            border-left: none;
+            border-top: none;
+        }
+
+        ul {
+            margin-left: 20px;
+        }
+
+        a {
+            color: #8b4513;
+            text-decoration: none;
+            border-bottom: 1px dotted #8b4513;
+        }
+
+        a:hover {
+            color: #654321;
+            border-bottom: 1px solid #654321;
+        }
+
+        @keyframes pageFlipForward {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes pageFlipBackward {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .book.flipping-forward {
+            animation: pageFlipForward 0.6s ease-in-out;
+        }
+
+        .book.flipping-backward {
+            animation: pageFlipBackward 0.6s ease-in-out;
+        }
+
+        .experience-item {
+            background: rgba(139, 69, 19, 0.05);
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 3px solid #8b4513;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .year-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #8b4513;
+            color: #f4e8d0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            font-family: 'Cinzel', serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container closed">
+        <div class="book-spine"></div>
+
+        <div class="book">
+            <!-- BOOK COVER -->
+            <div class="book-cover">
+                <div class="cover-ornament top-left"></div>
+                <div class="cover-ornament top-right"></div>
+                <div class="cover-ornament bottom-left"></div>
+                <div class="cover-ornament bottom-right"></div>
+
+                <div class="book-cover-content">
+                    <h1>The Chronicles and Works of Louis Li</h1>
+                    <p>Aspiring Game Designer and Programmer</p>
+                    <button class="open-book-btn" onclick="openBook()">Open Book</button>
+                </div>
+            </div>
+
+            <!-- LEFT SIDE -->
+            <div class="book-half left">
+                <!-- Page 1 Left: Cover -->
+                <div class="page active" data-page="1">
+                    <div class="page-content">
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center;">
+                            <h1 style="font-size: 3em; border: none; margin-bottom: 20px;">Louis Li's</h1>
+                            <h1 style="font-size: 2.2em; border: none; margin-bottom: 40px;">Portfolio & Works</h1>
+                            <div style="font-family: 'Cinzel', serif; font-size: 1.2em; font-style: italic; color: #654321; margin-top: 30px;">
+                                A Chronicle of Digital Adventures
+                            </div>
+                            <div style="margin-top: 60px; font-size: 0.9em; color: #8b4513;">
+                                Junior CS Major at University of Florida
+                            </div>
+                            <div style="margin-top: 10px; font-size: 0.9em; color: #8b4513;">
+                                Minor in Digital Arts and Sciences
+                            </div>
+                        </div>
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                </div>
+
+                <!-- Page 2 Left: About -->
+                <div class="page" data-page="2">
+                    <div class="page-content">
+                        <h1>About the Author</h1>
+
+                        <h2>The Journey</h2>
+                        <p>
+                            Greetings, traveler. I am Louis Li, a junior Computer Science major at the University of Florida
+                            with a minor in Digital Arts and Sciences. I first discovered the magic this world had to offer when
+                            I dabbled with modding minecraft and making simple games on Scratch. Since then, I have dedicated
+                            my life to discovering the hidden secrets of game development, game design, software engineering, 
+                            product management, and much more!
+                        </p>
+
+                        <p>
+                            Throughout my journeys, I have honed my skills, made many magical projects, and collaborated with
+                            some of the finest party members in all the realms. In the following pages, you can find out more about
+                            my adventures!
+                        </p>
+
+                        <h2>Philosophy</h2>
+                        <p>
+                            I believe in the power of thoughtful design and the importance of user-centered development.
+                            Whether it be coding, writing a design document, or conducing research, I believe that all magic
+                            serves the same purpose: to better the lives of the people we are creating for.
+                        </p>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">2</div>
+                </div>
+
+                <!-- Page 3 Left: Experience -->
+                <div class="page" data-page="3">
+                    <div class="page-content">
+                        <h1>Experience</h1>
+                        <p style="font-style: italic; margin-bottom: 30px;">
+                            My professional journey through realms of code and innovation
+                        </p>
+
+                        <div class="experience-item">
+                            <span class="year-badge">Summer 2024</span>
+                            <h3>Software Engineering Intern</h3>
+                            <p style="color: #8b4513; margin-bottom: 10px;">Bloomberg LP</p>
+                            <p>
+                                Created website for 100+ managers that allowed for more efficient access to client data.
+                                Implemented user authentication and test suite to increase coverage by 60%.
+                            </p>
+                        </div>
+
+                        <div class="experience-item">
+                            <span class="year-badge">Summer 2024</span>
+                            <h3>Product Manager</h3>
+                            <p style="color: #8b4513; margin-bottom: 10px;">Develop For Good</p>
+                            <p>
+                                Worked with non-profit Change Arts to make website improvements and improve stakeholder
+                                satisfaction by 35%.
+                            </p>
+                        </div>
+
+                        <div class="experience-item">
+                            <span class="year-badge">2023-Present</span>
+                            <h3>Dream Team Engineering Team Lead</h3>
+                            <p style="color: #8b4513; margin-bottom: 10px;">Caudal Block Team</p>
+                            <p>
+                                Worked with Shands hospital to create a 3-D Surgery Simulator for the Caudal Block
+                                Procedure, decreasing live errors by 47%.
+                            </p>
+                        </div>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">4</div>
+                </div>
+
+                <!-- Page 4 Left: Project 1 -->
+                <div class="page" data-page="4">
+                    <div class="page-content">
+                        <h1>Projects</h1>
+
+                        <div class="project-card">
+                            <img src="assets/loveatfirstfight.png" alt="Love at First Fight" class="project-image">
+                            <h3>Love at First Fight Game</h3>
+                            <p>
+                                Bullet-hell where the player writes a love poem to defeat the dragon, made using C# and Unity.
+                                Created as part of a 72-hour game Jam with the theme of "Charm".
+                            </p>
+                            <p style="font-size: 0.9em; color: #8b4513; margin-top: 10px;">
+                                <strong>Technologies:</strong> C#, Unity
+                            </p>
+                            <p>
+                                <a href="https://hilbertshotel.itch.io/love-at-first-fight" target="_blank">Play the Game</a>
+                            </p>
+                        </div>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">6</div>
+                </div>
+
+                <!-- Page 5 Left: Project 2 -->
+                <div class="page" data-page="5">
+                    <div class="page-content">
+                        <div class="project-card" style="margin-top: 50px;">
+                            <img src="assets/caudalblock.png" alt="3D Surgery Simulator" class="project-image">
+                            <h3>3D Surgery Simulator</h3>
+                            <p>
+                                High-fidelity Unity & C# simulator for venipuncture training with real-time scoring.
+                                Developed with UF Shands Hospital to help surgeons perform the Caudal Block Procedure.
+                            </p>
+                            <p style="font-size: 0.9em; color: #8b4513; margin-top: 10px;">
+                                <strong>Technologies:</strong> Unity, C#
+                            </p>
+                            <p>
+                                <a href="https://github.com/shreya-shenoy/CaudalBlock" target="_blank">View on GitHub</a>
+                            </p>
+                        </div>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">8</div>
+                </div>
+
+                <!-- Page 6 Left: Project 3 -->
+                <div class="page" data-page="6">
+                    <div class="page-content">
+                        <div class="project-card" style="margin-top: 50px;">
+                            <img src="assets/GatorGuide.png" alt="GatorGuide" class="project-image">
+                            <h3>GatorGuide Schedule Planner</h3>
+                            <p>
+                                React web app that helps UF students create their schedules. I primarily handled the backend
+                                and API integration.
+                            </p>
+                            <p style="font-size: 0.9em; color: #8b4513; margin-top: 10px;">
+                                <strong>Technologies:</strong> React, PostgreSQL
+                            </p>
+                            <p>
+                                <a href="https://github.com/CaseZumbrum/GatorGuide" target="_blank">GitHub</a> |
+                                <a href="https://gator-guide.com/#/" target="_blank">Visit Site</a>
+                            </p>
+                        </div>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">10</div>
+                </div>
+
+                <!-- Page 7 Left: Projects 4 & 5 -->
+                <div class="page" data-page="7">
+                    <div class="page-content">
+                        <div class="project-card" style="margin-top: 50px;">
+                            <img src="assets/PushAndPullTitleImage.png" alt="Push and Pull" class="project-image">
+                            <h3>Push and Pull Prototype</h3>
+                            <p>
+                                Prototype in Unreal Engine 5 exploring push/pull mechanics. My first UE5 project.
+                            </p>
+                            <p style="font-size: 0.9em; color: #8b4513; margin-top: 10px;">
+                                <strong>Technologies:</strong> Unreal Engine 5, C++
+                            </p>
+                            <p>
+                                <a href="https://hilbertshotel.itch.io/push-and-pull-prototype" target="_blank">Play</a>
+                            </p>
+                        </div>
+
+                        <div class="project-card">
+                            <img src="assets/turtlepic.png" alt="Turtle All The Way Up" class="project-image">
+                            <h3>Turtle All The Way Up</h3>
+                            <p>
+                                Vertical platformer where deaths spawn platforms for future turtles to use!
+                            </p>
+                            <p style="font-size: 0.9em; color: #8b4513; margin-top: 10px;">
+                                <strong>Role:</strong> Project Manager & Game Designer
+                            </p>
+                            <p>
+                                <a href="https://septicaled.itch.io/turtle-all-the-way-up" target="_blank">Play</a>
+                            </p>
+                        </div>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">12</div>
+                </div>
+
+                <!-- Page 8 Left: Skills -->
+                <div class="page" data-page="8">
+                    <div class="page-content">
+                        <h1>Skills & Abilities</h1>
+                        <p style="font-style: italic; margin-bottom: 30px;">
+                            The arsenal of a modern code wizard
+                        </p>
+
+                        <h2>Languages of Power</h2>
+                        <div class="skill-grid">
+                            <div class="skill-item">JavaScript</div>
+                            <div class="skill-item">Python</div>
+                            <div class="skill-item">C++</div>
+                            <div class="skill-item">C#</div>
+                        </div>
+
+                        <h2>Frameworks & Tools</h2>
+                        <div class="skill-grid">
+                            <div class="skill-item">React</div>
+                            <div class="skill-item">Unreal Engine</div>
+                            <div class="skill-item">Unity</div>
+                            <div class="skill-item">PostgreSQL</div>
+                        </div>
+
+                        <h2>Special Abilities</h2>
+                        <ul style="margin-top: 20px;">
+                            <li>Game Design & Development</li>
+                            <li>Full-Stack Web Development</li>
+                            <li>User Experience Design</li>
+                            <li>API Integration</li>
+                            <li>3D Simulation</li>
+                            <li>Agile Project Management</li>
+                        </ul>
+
+                        <div class="decorative-corner top-left"></div>
+                        <div class="decorative-corner bottom-left"></div>
+                    </div>
+                    <div class="page-number">14</div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="book-half right">
+                <!-- Page 1 Right: Table of Contents -->
+                <div class="page active" data-page="1">
+                    <div class="page-content">
+                        <h1>Table of Contents</h1>
+
+                        <ul class="toc-list">
+                            <li class="toc-item" onclick="goToPage(2)">
+                                <div class="toc-title">I. About the Author</div>
+                                <div class="toc-page">Page 2-3</div>
+                            </li>
+                            <li class="toc-item" onclick="goToPage(3)">
+                                <div class="toc-title">II. Experience</div>
+                                <div class="toc-page">Page 4-5</div>
+                            </li>
+                            <li class="toc-item" onclick="goToPage(4)">
+                                <div class="toc-title">III. Projects</div>
+                                <div class="toc-page">Pages 6-13</div>
+                            </li>
+                            <li class="toc-item" onclick="goToPage(8)">
+                                <div class="toc-title">IV. Skills & Abilities</div>
+                                <div class="toc-page">Page 14-15</div>
+                            </li>
+                        </ul>
+
+                        <div style="margin-top: 40px; font-style: italic; text-align: center; color: #8b4513;">
+                            "Knowledge is the true treasure of the wise"
+                        </div>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">1</div>
+                </div>
+
+                <!-- Page 2 Right: Contact Info -->
+                <div class="page" data-page="2">
+                    <div class="page-content">
+                        <h2>Contact Information</h2>
+                        <p>
+                            Should you wish to collaborate on a quest or simply exchange knowledge,
+                            you may reach me through the following channels:
+                        </p>
+
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <strong>📧 Email:</strong> <a href="mailto:louis10272004@gmail.com">louis10272004@gmail.com</a>
+                            </div>
+                            <div class="contact-item">
+                                <strong>💼 LinkedIn:</strong> <a href="https://www.linkedin.com/in/uflouisli" target="_blank">linkedin.com/in/uflouisli</a>
+                            </div>
+                            <div class="contact-item">
+                                <strong>🐙 GitHub:</strong> <a href="https://github.com/LouisUF" target="_blank">github.com/LouisUF</a>
+                            </div>
+                        </div>
+
+                        <p style="margin-top: 30px; font-style: italic; text-align: center; color: #8b4513;">
+                            "The greatest adventures often begin with a simple message"
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">3</div>
+                </div>
+
+                <!-- Page 3 Right -->
+                <div class="page" data-page="3">
+                    <div class="page-content">
+                        <h2>A Journey of Growth</h2>
+                        <p style="margin-top: 30px;">
+                            From internships at leading tech companies to collaborative projects with healthcare
+                            institutions, each experience has shaped my approach to problem-solving and innovation.
+                        </p>
+                        <p>
+                            I've learned that the best solutions come from understanding the needs of those who will
+                            use them, whether they're managers accessing client data, surgeons learning critical
+                            procedures, or non-profit organizations serving their communities.
+                        </p>
+                        <p style="margin-top: 40px; font-style: italic; text-align: center; color: #8b4513;">
+                            "Experience is not what happens to you; it's what you do with what happens to you."
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">5</div>
+                </div>
+
+                <!-- Page 4 Right -->
+                <div class="page" data-page="4">
+                    <div class="page-content">
+                        <h2>Design Philosophy</h2>
+                        <p style="margin-top: 20px;">
+                            This game was made as part of a 72-hour game Jam with the theme of "Charm". I primarily handled the general story/combat design and programming the boss. When ideating the game, I wanted to put a spin on the classic bullet-hell boss by making the player have to defeat the enemy with charm and wit rather than through attacks. So, I immediately thought about the dragon-seducing bard stereotype. That's how Finley the Charming Bard came to be. Then, the gameplay loop evolved from there
+                        </p>
+                        <p>
+                            As the fight progresses, the player has to constantly write poems while choosing words that spawn around the arena to complete the poem. Depending on the word they choose, they get certain powerups that will allow them to survive the dragon's onslaught until they can complete the next verse. I chose this design to give player's a sense of agency and choice, with the powerups giving players meaningful abilities depending on what they choose.
+
+                            Additionally, when designing the dragon's combat attacks, I tried to make it clear that the dragon was slowly getting charmed by the player. For example, the dragon's fireballs would eventually take on a heart shape as the battle goes on.
+
+                            An important feature we weren't able to implement due to time restraints is the freezing of the game when words spawn. This would allow players time to read the poem that has been writing in the background, which their attention would most likely be on dodging attacks as the game went on.
+                        </p>
+                        <p style="margin-top: 30px; font-style: italic; text-align: center; color: #8b4513;">
+                            "Good design is about creating meaningful experiences"
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">7</div>
+                </div>
+
+                <!-- Page 5 Right -->
+                <div class="page" data-page="5">
+                    <div class="page-content">
+                        <h2>Medical Simulation</h2>
+                        <p style="margin-top: 20px;">
+                            This was developed with the UF Shands Hospital in order to help surgeons perform the Caudal Block Procedure on babies. My work on this project was primarily technical. I helped link the physical needle and baby model to the ones in Unity, enabled an ultrasound feature that would allow users to see where their needle is inside of the baby, and added scoring features that told users if they inserted the needle at the right angle and into the correct depth.
+                        </p>
+                        <p>
+                            The main thing I learned from this project was how to work with a team, since I had to constantly work with doctors, engineers, and other programmers to ensure medical accuracy with this project. It also taught me a lot about how to design something with end users in mind. Because the target audience for this project was young surgeons who were not necessarily used to this type of technology, we focused on keeping the UI simple and focusing on functionality and accuracy over all else.
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">9</div>
+                </div>
+
+                <!-- Page 6 Right -->
+                <div class="page" data-page="6">
+                    <div class="page-content">
+                        <h2>User-Centered Development</h2>
+                        <p style="margin-top: 20px;">
+                            I created this project with a small team of friends in order to make a better platform for UF engineering students to create their schedule. I primarily handled the backend and ideation for this project.
+                        </p>
+                        <p>
+                            This project helped me learn about how to use an API and work with large amounts of data, since I had to parse through and utilize course information about everything that has been offered at UF. Additionally, it also taught me how to write efficient algorithms that could handle this level of data.
+
+                            However, the main thing I learned about creating GatorGuide was thinking from the end user's perspective. We really focused on what students like us would want out of a schedule planner, which is how we eventually settled on the features we would prioritize, such as a pre-requisite checker, semester planner, and my personal favorite, a running list of what you are missing from your four-year plan in order to graduate.
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">11</div>
+                </div>
+
+                <!-- Page 7 Right -->
+                <div class="page" data-page="7">
+                    <div class="page-content">
+                        <h2>Learning & Iteration</h2>
+                        <p style="margin-top: 20px;">
+                            Both of these games, while incredibly different, helped me learn similar lessons about the importance of
+                            constant iteration.
+                            While Turtle All The Way Up is a 2-D platformer made in Unity focused on a roguelike upgrade system and 
+                            an interesting respawn system, Push and Pull Simulator was a prototype I made in Unreal Engine 5 that focuses
+                            on a single interesting mechanic: pushing and pulling yourself and objects.
+                        </p>
+                        <p>
+                            However, both of these projects required extensive testing and iterating to get right. For Turtle All The Way Up, 
+                            I had many friends playtest the game, which was vital for fine tuning the numbers, upgrades, and most importantly,
+                            ensuring all gameplay mechanics were understandable. Similarly, other people's feedback on Push and Pull Simulator
+                            helped me figure out the best VX to use in order to improve gameplay clarity. Both of these projects were 
+                            valuable lessons in the importance of getting user feedback early and utilizing it along with your own
+                            judgement to make the best game possible.
+                        </p>
+                        <p style="margin-top: 30px; font-style: italic; text-align: center; color: #8b4513;">
+                            "Every setback is a stepping stone to success"
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">13</div>
+                </div>
+
+                <!-- Page 8 Right -->
+                <div class="page" data-page="8">
+                    <div class="page-content">
+                        <h2>Continuous Growth</h2>
+                        <p style="margin-top: 30px;">
+                            Despite my many adventures and experiences, I know that I still have much to learn if I wish
+                            to understand the full depth of the magic this world has to offer. While I believe that my experience
+                            as both a designer and developer gives me unique insight into the creative and logistical processes that 
+                            are involved in making a new game, app, or website, I also know that I have a long way to go before I can 
+                            consider myself an expert in any one of these categories.
+                        </p>
+                        <p>
+                            Unlike many other books, mine is constantly being written and updated. Each section will only get larger 
+                            as my journeys continue, and that is something I cannot be more excited about. I am very thankful that you 
+                            took the time to read through my entire book, and I hope that the next time you return, you may find it just 
+                            a little bit better than the version you first read. Thank you.
+                        </p>
+                        <p style="margin-top: 40px; font-style: italic; text-align: center; color: #8b4513;">
+                            "Mastery is not a destination, but an endless journey"
+                        </p>
+
+                        <div class="decorative-corner top-right"></div>
+                        <div class="decorative-corner bottom-right"></div>
+                    </div>
+                    <div class="page-number">15</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation disabled">
+        <button class="nav-button skip-button" id="startBtn" onclick="skipToStart()">⏮</button>
+        <button class="nav-button" id="prevBtn">←</button>
+        <button class="nav-button" id="nextBtn">→</button>
+        <button class="nav-button skip-button" id="endBtn" onclick="skipToEnd()">⏭</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 8;
+        let isAnimating = false;
+        let bookOpened = false;
+
+        function openBook() {
+            const bookContainer = document.querySelector('.book-container');
+            const navigation = document.querySelector('.navigation');
+            bookContainer.classList.remove('closed');
+            navigation.classList.remove('disabled');
+            bookOpened = true;
+            updatePages();
+        }
+
+        function updatePages() {
+            const leftPages = document.querySelectorAll('.book-half.left .page');
+            const rightPages = document.querySelectorAll('.book-half.right .page');
+
+            leftPages.forEach(page => {
+                const pageNum = parseInt(page.getAttribute('data-page'));
+                page.classList.toggle('active', pageNum === currentPage);
+            });
+
+            rightPages.forEach(page => {
+                const pageNum = parseInt(page.getAttribute('data-page'));
+                page.classList.toggle('active', pageNum === currentPage);
+            });
+
+            if (bookOpened) {
+                document.getElementById('prevBtn').classList.toggle('disabled', currentPage === 1);
+                document.getElementById('nextBtn').classList.toggle('disabled', currentPage === totalPages);
+                document.getElementById('startBtn').classList.toggle('disabled', currentPage === 1);
+                document.getElementById('endBtn').classList.toggle('disabled', currentPage === totalPages);
+            }
+        }
+
+        function nextPage() {
+            if (!bookOpened || currentPage >= totalPages || isAnimating) return;
+
+            isAnimating = true;
+            const book = document.querySelector('.book');
+
+            book.classList.add('flipping-forward');
+
+            setTimeout(() => {
+                currentPage++;
+                updatePages();
+                book.classList.remove('flipping-forward');
+                isAnimating = false;
+            }, 600);
+        }
+
+        function previousPage() {
+            if (!bookOpened || currentPage <= 1 || isAnimating) return;
+
+            isAnimating = true;
+            const book = document.querySelector('.book');
+
+            book.classList.add('flipping-backward');
+
+            setTimeout(() => {
+                currentPage--;
+                updatePages();
+                book.classList.remove('flipping-backward');
+                isAnimating = false;
+            }, 600);
+        }
+
+        function goToPage(page) {
+            if (!bookOpened || page < 1 || page > totalPages || page === currentPage || isAnimating) return;
+
+            const direction = page > currentPage ? 1 : -1;
+
+            function flipOne() {
+                if (currentPage === page) return;
+
+                if (direction > 0) {
+                    nextPage();
+                } else {
+                    previousPage();
+                }
+
+                setTimeout(flipOne, 650);
+            }
+
+            flipOne();
+        }
+
+        function skipToStart() {
+            if (!bookOpened || currentPage === 1) return;
+
+            currentPage = 1;
+            updatePages();
+        }
+
+        function skipToEnd() {
+            if (!bookOpened || currentPage === totalPages) return;
+
+            currentPage = totalPages;
+            updatePages();
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', previousPage);
+        document.getElementById('nextBtn').addEventListener('click', nextPage);
+
+        document.addEventListener('keydown', (e) => {
+            if (!bookOpened) return;
+            if (e.key === 'ArrowLeft') previousPage();
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'Home') skipToStart();
+            if (e.key === 'End') skipToEnd();
+        });
+    </script>
+</body>
 </html>
